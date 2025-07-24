@@ -138,6 +138,7 @@ func (h *History) GetHistory(symbol string) (YahooHistoryRespose, error) {
 	params.Add("interval", h.query.Interval)
 	params.Add("period1", h.query.Start)
 	params.Add("period2", h.query.End)
+	params.Add("includePrePost", "true")
 
 	endpoint := fmt.Sprintf("%s/v8/finance/chart/%s", BASE_URL, symbol)
 	resp, err := h.client.Get(endpoint, params)
@@ -150,7 +151,7 @@ func (h *History) GetHistory(symbol string) (YahooHistoryRespose, error) {
 	var historyResponse YahooHistoryRespose
 	if err := json.NewDecoder(resp.Body).Decode(&historyResponse); err != nil {
 		slog.Error("Failed to decode history data JSON response", "err", err)
-    	return YahooHistoryRespose{}, err
+		return YahooHistoryRespose{}, err
 
 	}
 
