@@ -42,6 +42,33 @@ func (t *Ticker) History(query HistoryQuery) (map[string]PriceData, error) {
 	return t.history.transformData(history), nil
 }
 
+// HistoryWithPremarket은 premarket 데이터를 포함한 주식의 과거 가격 데이터를 조회합니다.
+//
+// 매개변수:
+// - query: 조회 조건을 담은 HistoryQuery 구조체 (Prepost가 자동으로 true로 설정됨)
+//
+// 반환값:
+// - map[string]PriceData: 날짜별 가격 데이터 (premarket/postmarket 포함)
+// - error: 조회 중 발생한 오류
+//
+// 주의사항:
+// - Premarket 시간대의 volume은 종종 0이거나 매우 낮을 수 있습니다
+// - 이는 실제 거래량이 적거나 Yahoo Finance API의 제한사항일 수 있습니다
+// - 가격 데이터(OHLC)는 정상적으로 제공되지만 volume은 제한적일 수 있습니다
+func (t *Ticker) HistoryWithPremarket(query HistoryQuery) (map[string]PriceData, error) {
+	if t.history == nil {
+		t.history = NewHistory()
+	}
+	// premarket 데이터를 포함하도록 설정
+	query.Prepost = true
+	t.history.SetQuery(query)
+	history, err := t.history.GetHistory(t.Symbol)
+	if err != nil {
+		return nil, err
+	}
+	return t.history.transformData(history), nil
+}
+
 // OptionChain은 주식의 옵션 체인 정보를 조회합니다.
 //
 // 반환값:
